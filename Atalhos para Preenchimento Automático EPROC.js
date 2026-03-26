@@ -5,6 +5,8 @@
 // @description  Dashboard Multi-Minutas (Gatilho Estável + Captura Cirúrgica + Sem Toasts de Preenchimento)
 // @author       Allison de Castro Silva
 // @match        https://eproc1g.tjmg.jus.br/eproc/controlador.php?acao=minuta_editar*
+// @updateURL    https://github.com/AllisondeCastro/Painel-de-Atalhos/edit/main/Atalhos%20para%20Preenchimento%20Autom%C3%A1tico%20EPROC.js
+// @downloadURL  https://github.com/AllisondeCastro/Painel-de-Atalhos/edit/main/Atalhos%20para%20Preenchimento%20Autom%C3%A1tico%20EPROC.js
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
