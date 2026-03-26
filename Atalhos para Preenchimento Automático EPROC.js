@@ -5,8 +5,8 @@
 // @description  Dashboard Multi-Minutas
 // @author       Allison de Castro Silva
 // @match        https://eproc1g.tjmg.jus.br/eproc/controlador.php?acao=minuta_editar*
-// @updateURL    https://raw.githubusercontent.com/AllisondeCastro/Painel-de-Atalhos/main/Atalhos%20para%20Preenchimento%20Autom%C3%A1tico%20EPROC.js
-// @downloadURL  https://raw.githubusercontent.com/AllisondeCastro/Painel-de-Atalhos/main/Atalhos%20para%20Preenchimento%20Autom%C3%A1tico%20EPROC.js
+// @updateURL    https://raw.githubusercontent.com/AllisondeCastro/Painel-de-Atalhos/main/Atalhos%20para%20Preenchimento%20Autom%C3%A1tico%20EPROC.user.js
+// @downloadURL  https://raw.githubusercontent.com/AllisondeCastro/Painel-de-Atalhos/main/Atalhos%20para%20Preenchimento%20Autom%C3%A1tico%20EPROC.user.js
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
