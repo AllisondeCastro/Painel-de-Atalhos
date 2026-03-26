@@ -2,7 +2,7 @@
 // @name         Atalhos para Preenchimento Automático EPROC
 // @namespace    http://tampermonkey.net/
 // @version      7.1
-// @description  Dashboard Multi-Minutas (Gatilho Estável + Captura Cirúrgica + Sem Toasts de Preenchimento)
+// @description  Dashboard Multi-Minutas
 // @author       Allison de Castro Silva
 // @match        https://eproc1g.tjmg.jus.br/eproc/controlador.php?acao=minuta_editar*
 // @updateURL    https://github.com/AllisondeCastro/Painel-de-Atalhos/edit/main/Atalhos%20para%20Preenchimento%20Autom%C3%A1tico%20EPROC.js
