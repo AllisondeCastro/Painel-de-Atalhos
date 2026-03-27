@@ -48,12 +48,12 @@
                     "font": ""
                 },
                 {
-                    "id": "item4_residencia90",
+                    "id": "item4_residencia180",
                     "category": "4 Endereço",
-                    "name": "90 dias",
+                    "name": "180 dias",
                     "target": "( ) insuficiente (desatualizado e/ou em nome de 3º sem comprovação) -",
                     "isRegex": false,
-                    "novo": "(  X  ) desatualizado. Datado de período superior a 90 dias da distribuição da ação - ",
+                    "novo": "(  X  ) desatualizado. Datado de período superior a 180 dias da distribuição da ação - ",
                     "bold": true,
                     "italic": false,
                     "font": ""
@@ -64,7 +64,7 @@
                     "name": "Inexistente",
                     "target": "( ) insuficiente (desatualizado e/ou em nome de 3º sem comprovação) -",
                     "isRegex": false,
-                    "novo": "( X ) Inexistente. Comprovante de endereço, em nome da parte autora, ou de pessoa com quem comprove vínculo, datado de ao menos 90 dias da distribuição da demanda, podendo ser contas de luz ou água, boletos de contas bancárias, fatura de cartão de crédito, plano de saúde, tv por assinatura, streaming, linhas de celular. ",
+                    "novo": "( X ) Inexistente. Comprovante de endereço, em nome da parte autora, ou de pessoa com quem comprove vínculo, datado de ao menos 180 dias da distribuição da demanda, podendo ser contas de luz ou água, boletos de contas bancárias, fatura de cartão de crédito, plano de saúde, tv por assinatura, streaming, linhas de celular. ",
                     "bold": true,
                     "italic": false,
                     "font": ""
@@ -75,7 +75,7 @@
                     "name": "Insuficiente",
                     "target": "( ) insuficiente (desatualizado e/ou em nome de 3º sem comprovação) -",
                     "isRegex": false,
-                    "novo": "( X ) insuficiente. Comprovante de endereço, em nome da parte autora, ou de pessoa com quem comprove vínculo, datado de ao menos 90 dias da distribuição da demanda, podendo ser contas de luz ou água, boletos de contas bancárias, fatura de cartão de crédito, plano de saúde, tv por assinatura, streaming, linhas de celular - ",
+                    "novo": "( X ) insuficiente. Comprovante de endereço, em nome da parte autora, ou de pessoa com quem comprove vínculo, datado de ao menos 180 dias da distribuição da demanda, podendo ser contas de luz ou água, boletos de contas bancárias, fatura de cartão de crédito, plano de saúde, tv por assinatura, streaming, linhas de celular - ",
                     "bold": true,
                     "italic": false,
                     "font": ""
