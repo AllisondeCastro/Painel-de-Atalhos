@@ -5,8 +5,8 @@
 // @description  Dashboard Multi-Minutas
 // @author       Allison de Castro Silva
 // @match        https://eproc1g.tjmg.jus.br/eproc/controlador.php?acao=minuta_editar*
-// @updateURL    https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/NOME_DO_ARQUIVO.user.js
-// @downloadURL  https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/NOME_DO_ARQUIVO.user.js
+// @updateURL    https://github.com/AllisondeCastro/Painel-de-Atalhos/raw/refs/heads/main/Painel%20de%20atalhos%20para%20minuta%20de%20Triagem%20EPROC.user.js
+// @downloadURL  https://github.com/AllisondeCastro/Painel-de-Atalhos/raw/refs/heads/main/Painel%20de%20atalhos%20para%20minuta%20de%20Triagem%20EPROC.user.js
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
