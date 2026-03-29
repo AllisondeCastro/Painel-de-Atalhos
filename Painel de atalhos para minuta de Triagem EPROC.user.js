@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Painel de atalhos para minuta de Triagem EPROC
 // @namespace    http://tampermonkey.net/
-// @version      7.1
+// @version      7.3
 // @description  Dashboard Multi-Minutas
 // @author       Allison de Castro Silva
 // @match        https://eproc1g.tjmg.jus.br/eproc/controlador.php?acao=minuta_editar*
@@ -227,6 +227,7 @@
             let textoInsercao = regra.novo.replace(/\r?\n/g, '<br>');
             if (regra.italic) textoInsercao = `<em>${textoInsercao}</em>`;
             if (regra.bold) textoInsercao = `<strong>${textoInsercao}</strong>`;
+            if (regra.underline) textoInsercao = `<u>${textoInsercao}</u>`;
             if (regra.font) textoInsercao = `<span style="font-family: ${regra.font};">${textoInsercao}</span>`;
 
             let regexStr;
@@ -583,11 +584,23 @@
                                 </label>
                             </div>
 
-                            <label class="tm-label-dig" style="display: flex; flex-direction: column; gap: 2px;">Novo Texto (A ser digitado): <textarea id="tm-cfg-novo" class="tm-input" style="resize: vertical; min-height: 45px;"></textarea></label>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                    <label class="tm-label-dig" style="margin-bottom: 0;">Novo Texto (A ser digitado):</label>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button type="button" id="tm-btn-fmt-bold" class="tm-botao" style="padding: 2px 8px; font-weight: bold; font-size: 10px;" title="Negrito Parcial no texto selecionado (Tag <b>)">B</button>
+                                        <button type="button" id="tm-btn-fmt-italic" class="tm-botao" style="padding: 2px 8px; font-style: italic; font-size: 10px;" title="Itálico Parcial no texto selecionado (Tag <i>)">I</button>
+                                        <button type="button" id="tm-btn-fmt-underline" class="tm-botao" style="padding: 2px 8px; text-decoration: underline; font-size: 10px;" title="Sublinhado Parcial no texto selecionado (Tag <u>)">U</button>
+                                    </div>
+                                </div>
+                                <textarea id="tm-cfg-novo" class="tm-input" style="resize: vertical; min-height: 45px;"></textarea>
+                            </div>
 
                             <div style="display: flex; gap: 15px; align-items: center; margin-top: 2px;">
+                                <span class="tm-label-dig" style="font-size: 10px;">Aplicar em tudo:</span>
                                 <label class="tm-label-dig" style="display: flex; align-items: center; gap: 5px;"><input type="checkbox" id="tm-cfg-bold"> <strong>Negrito</strong></label>
                                 <label class="tm-label-dig" style="display: flex; align-items: center; gap: 5px;"><input type="checkbox" id="tm-cfg-italic"> <em>Itálico</em></label>
+                                <label class="tm-label-dig" style="display: flex; align-items: center; gap: 5px;"><input type="checkbox" id="tm-cfg-underline"> <u>Sublinhado</u></label>
                             </div>
 
                             <div style="display: flex; gap: 10px; margin-top: auto; padding-top: 10px;">
@@ -638,6 +651,26 @@
         const btnNovoPerfil = container.querySelector('#tm-btn-novo-perfil');
         const btnExcluirPerfil = container.querySelector('#tm-btn-excluir-perfil');
         const inKeywords = container.querySelector('#tm-cfg-perfil-keywords');
+
+        const btnFmtBold = container.querySelector('#tm-btn-fmt-bold');
+        const btnFmtItalic = container.querySelector('#tm-btn-fmt-italic');
+        const btnFmtUnderline = container.querySelector('#tm-btn-fmt-underline');
+        const txtNovo = container.querySelector('#tm-cfg-novo');
+
+        function injetarTagFormato(tagA, tagB) {
+            const start = txtNovo.selectionStart;
+            const end = txtNovo.selectionEnd;
+            const val = txtNovo.value;
+            const sel = val.substring(start, end);
+            txtNovo.value = val.substring(0, start) + tagA + sel + tagB + val.substring(end);
+            txtNovo.focus();
+            txtNovo.selectionStart = start + tagA.length;
+            txtNovo.selectionEnd = start + tagA.length + sel.length;
+        }
+
+        btnFmtBold.addEventListener('click', () => injetarTagFormato('<b>', '</b>'));
+        btnFmtItalic.addEventListener('click', () => injetarTagFormato('<i>', '</i>'));
+        btnFmtUnderline.addEventListener('click', () => injetarTagFormato('<u>', '</u>'));
 
         // ======================================================================
         // NOVO: SISTEMA POINT-AND-CLICK PARA CAPTURA CIRÚRGICA DE ALVO DIRETO NA MINUTA
@@ -995,6 +1028,7 @@
             container.querySelector('#tm-cfg-novo').value = '';
             container.querySelector('#tm-cfg-bold').checked = false;
             container.querySelector('#tm-cfg-italic').checked = false;
+            container.querySelector('#tm-cfg-underline').checked = false;
             container.querySelector('#tm-btn-excluir-regra').style.display = 'none';
         }
 
@@ -1007,6 +1041,7 @@
             container.querySelector('#tm-cfg-novo').value = regra.novo;
             container.querySelector('#tm-cfg-bold').checked = regra.bold || false;
             container.querySelector('#tm-cfg-italic').checked = regra.italic || false;
+            container.querySelector('#tm-cfg-underline').checked = regra.underline || false;
             container.querySelector('#tm-btn-excluir-regra').style.display = 'block';
         }
 
@@ -1034,6 +1069,7 @@
                 novo: container.querySelector('#tm-cfg-novo').value || '',
                 bold: container.querySelector('#tm-cfg-bold').checked,
                 italic: container.querySelector('#tm-cfg-italic').checked,
+                underline: container.querySelector('#tm-cfg-underline').checked,
                 font: ''
             };
 
