@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Painel de atalhos para minuta de Triagem EPROC
 // @namespace    http://tampermonkey.net/
-// @version      7.3
+// @version      7.4
 // @description  Dashboard Multi-Minutas
 // @author       Allison de Castro Silva
 // @match        https://eproc1g.tjmg.jus.br/eproc/controlador.php?acao=minuta_editar*
@@ -151,7 +151,7 @@
         const title = document.title || '';
 
         let headerTexts =[];
-        let elementos = document.querySelectorAll('#lblInfraDescricaoTela, .infraAreaTelaDsc, #selTipoDocumento, #txtDescricao, #txtNomeDocumento, #txtNomeMinuta, input[type="text"], select');
+        let elementos = document.querySelectorAll('#lblInfraDescricaoTela, .infraAreaTelaDsc, #selTipoDocumento, #txtDescricao, #txtNomeDocumento, #txtNomeMinuta');
 
         elementos.forEach(el => {
             if (el.tagName && el.tagName.toLowerCase() === 'select') {
@@ -163,15 +163,7 @@
             }
         });
 
-        let editorContent = '';
-        try {
-            let editor = obterEditorValido();
-            if (editor && editor.document && editor.document.getBody()) {
-                editorContent = editor.document.getBody().getText().substring(0, 4000);
-            }
-        } catch(e) {}
-
-        const textToSearch = (title + " " + headerTexts.join(' ') + " " + editorContent).replace(/\s+/g, ' ');
+        const textToSearch = (title + " " + headerTexts.join(' ')).replace(/\s+/g, ' ');
 
         perfilAtivo = null;
         for (let p of perfisSalvos) {
@@ -1104,21 +1096,26 @@
 
         renderPainelPrincipal();
 
-        // Faz uma verificação de AJAX até 15 segundos para auto-abrir se os textos carregarem depois
+        // Faz uma verificação de AJAX até 15 segundos para atualizar a interface conforme o tipo de documento
         let checkCount = 0;
         const autoAbrirInterval = setInterval(() => {
             checkCount++;
-            let estavaNulo = (perfilAtivo === null);
+            let antes = perfilAtivo ? perfilAtivo.id : null;
             detectarPerfilAtual();
+            let depois = perfilAtivo ? perfilAtivo.id : null;
 
-            if (perfilAtivo) {
-                clearInterval(autoAbrirInterval);
-                if (estavaNulo) {
+            if (antes !== depois) {
+                if (perfilAtivo) {
                     fab.classList.add('tm-hidden');
                     painel.classList.add('tm-visible');
-                    renderPainelPrincipal();
+                } else {
+                    painel.classList.remove('tm-visible');
+                    fab.classList.remove('tm-hidden');
                 }
-            } else if (checkCount >= 15) {
+                renderPainelPrincipal();
+            }
+
+            if (perfilAtivo || checkCount >= 15) {
                 clearInterval(autoAbrirInterval);
             }
         }, 1000);
