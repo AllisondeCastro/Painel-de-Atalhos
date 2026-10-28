@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Painel de atalhos para minuta de Triagem EPROC
 // @namespace    http://tampermonkey.net/
-// @version      8.14
+// @version      8.15
 // @description  Dashboard Multi-Minutas
 // @author       Allison de Castro Silva
 // @match        https://eproc1g.tjmg.jus.br/eproc/controlador.php?acao=arvore_documento_listar*
@@ -455,19 +455,36 @@
       nome: 'Certidão de Triagem',
       keywords: 'Certidão de Triagem',
       regras: [
-        { id: 'item3_rg', category: '3 RG', name: '10 anos', target: '( ) Desatualizado/inexistente/desconforme -', isRegex: false, novo: '( X ) desatualizado. Emitido em período superior a 10 anos da distribuição da ação - ', bold: true, italic: false, font: '' },
-        { id: 'item4_residencia180', category: '4 Endereço', name: '180 dias', target: '( ) insuficiente (desatualizado e/ou em nome de 3º sem comprovação) -', isRegex: false, novo: '(  X  ) desatualizado. Datado de período superior a 180 dias da distribuição da ação - ', bold: true, italic: false, font: '' },
-        { id: 'item4_inexistente', category: '4 Endereço', name: 'Inexistente', target: '( ) insuficiente (desatualizado e/ou em nome de 3º sem comprovação) -', isRegex: false, novo: '( X ) Inexistente. Comprovante de endereço, em nome da parte autora, ou de pessoa com quem comprove vínculo, datado de ao menos 180 dias da distribuição da demanda, podendo ser contas de luz ou água, boletos de contas bancárias, fatura de cartão de crédito, plano de saúde, tv por assinatura, streaming, linhas de celular. ', bold: true, italic: false, font: '' },
-        { id: 'item4_insuficiente', category: '4 Endereço', name: 'Insuficiente', target: '( ) insuficiente (desatualizado e/ou em nome de 3º sem comprovação) -', isRegex: false, novo: '( X ) insuficiente. Comprovante de endereço, em nome da parte autora, ou de pessoa com quem comprove vínculo, datado de ao menos 180 dias da distribuição da demanda, podendo ser contas de luz ou água, boletos de contas bancárias, fatura de cartão de crédito, plano de saúde, tv por assinatura, streaming, linhas de celular - ', bold: true, italic: false, font: '' },
-        { id: 'item5_digital', category: '5 Assinatura', name: 'Digital', target: '(   ) desconforme –  Motivo:', isRegex: false, novo: '( X ) desconforme. Motivo: não foi possível certificar a autenticidade da assinatura digital -  \n', bold: true, italic: false, font: '' },
-        { id: 'regra_1773139643710', category: '5 Assinatura', name: '1 Ano', target: '(   ) desconforme –  Motivo:', isRegex: false, novo: '( X ) Desconforme. Motivo: documento datado superior a um ano da distribuição da demanda. - ', bold: true, italic: false, font: '' },
-        { id: 'item3_assinatura', category: '5 Assinatura', name: 'Assin. Divergente', target: '(   ) desconforme –  Motivo:', isRegex: false, novo: '( X ) insuficiente. assinatura diverge do documento de identificação juntado aos autos - ', bold: true, italic: false, font: '' },
-        { id: 'regra_1773829306382', category: '6 AJG', name: 'SEM Rendimentos', target: '(   ) há pedido de AJG sem comprovação de rendimentos', isRegex: false, novo: '(  X ) há pedido de AJG sem comprovação de rendimentos.', bold: true, italic: false, font: '' }
+        // --- Item 3: Documento de identificação ---
+        { id: 'item3_nao_apresentado', category: '3 – Doc. de Identidade', name: 'Não apresentado', target: '(   ) Não apresentado', isRegex: false, novo: '( X ) Não apresentado.', bold: true, italic: false, font: '' },
+        { id: 'item3_ilegivel', category: '3 – Doc. de Identidade', name: 'Ilegível', target: '(   ) Ilegível -', isRegex: false, novo: '( X ) Ilegível - ', bold: true, italic: false, font: '' },
+        { id: 'item3_desatualizado', category: '3 – Doc. de Identidade', name: '+10 anos', target: '(   ) Desatualizado - emitido há mais de 10 anos', isRegex: false, novo: '( X ) Desatualizado - emitido há mais de 10 anos - ', bold: true, italic: false, font: '' },
+        // --- Item 4: Comprovante de endereço ---
+        { id: 'item4_nao_apresentado', category: '4 – Endereço', name: 'Não apresentado', target: '(   ) Não apresentado', isRegex: false, novo: '( X ) Não apresentado.', bold: true, italic: false, font: '', ocorrencia: 2 },
+        { id: 'item4_180dias', category: '4 – Endereço', name: '+180 dias', target: '(   ) Desatualizado - emitido há mais de 180 dias', isRegex: false, novo: '( X ) Desatualizado - emitido há mais de 180 dias - ', bold: true, italic: false, font: '' },
+        { id: 'item4_terceiro', category: '4 – Endereço', name: '3º s/ vínculo', target: '(   ) Desconforme - em nome de terceira pessoa sem comprovação de parentesco ou locação', isRegex: false, novo: '( X ) Desconforme - em nome de terceira pessoa sem comprovação de parentesco ou locação - ', bold: true, italic: false, font: '' },
+        { id: 'item4_incompleto', category: '4 – Endereço', name: 'Incompleto', target: '(   ) Desconforme - exibido apenas em parte e /ou sem data de emissão', isRegex: false, novo: '( X ) Desconforme - exibido apenas em parte e/ou sem data de emissão - ', bold: true, italic: false, font: '' },
+        { id: 'item4_comarca', category: '4 – Endereço', name: 'Comarca diversa', target: '(   ) Desconforme - endereço em comarca diversa daquela em que foi proposta a ação', isRegex: false, novo: '( X ) Desconforme - endereço em comarca diversa daquela em que foi proposta a ação - ', bold: true, italic: false, font: '' },
+        { id: 'item4_pj', category: '4 – Endereço', name: 'PJ', target: '(   ) Autor é pessoa jurídica', isRegex: false, novo: '( X ) Autor é pessoa jurídica.', bold: true, italic: false, font: '' },
+        // --- Item 5: Procuração/substabelecimento ---
+        { id: 'item5_nao_apresentada', category: '5 – Procuração', name: 'Não apresentada', target: '(   ) Não apresentada', isRegex: false, novo: '( X ) Não apresentada.', bold: true, italic: false, font: '' },
+        { id: 'item5_sem_assinatura', category: '5 – Procuração', name: 'Sem assinatura', target: '(   ) Desconforme – documento sem assinatura ou com assinatura corrompida', isRegex: false, novo: '( X ) Desconforme – documento sem assinatura ou com assinatura corrompida - ', bold: true, italic: false, font: '' },
+        { id: 'item5_analfabeto', category: '5 – Procuração', name: 'Analfabeto', target: '(   ) Desconforme – ausente procuração por instrumento público autor analfabeto', isRegex: false, novo: '( X ) Desconforme – ausente procuração por instrumento público autor analfabeto - ', bold: true, italic: false, font: '' },
+        { id: 'item5_sem_data', category: '5 – Procuração', name: 's/Data', target: '(   ) Desconforme – SEM assinatura ou SEM data de expedição', isRegex: false, novo: '( X ) Desconforme – SEM assinatura ou SEM data de expedição - ', bold: true, italic: false, font: '' },
+        { id: 'item5_divergente', category: '5 – Procuração', name: 'Divergente', target: '(   ) Desconforme – assinatura diferente daquela constante no documento de identificação', isRegex: false, novo: '( X ) Desconforme – assinatura diferente daquela constante no documento de identificação - ', bold: true, italic: false, font: '' },
+        { id: 'item5_sem_poderes', category: '5 – Procuração', name: 's/Poderes', target: '(   ) Desconforme – outorga de poderes com finalidade diversa', isRegex: false, novo: '( X ) Desconforme – outorga de poderes com finalidade diversa - ', bold: true, italic: false, font: '' },
+        { id: 'item5_1ano', category: '5 – Procuração', name: '1 ano', target: '(   ) Desatualizada – datada de período superior a um ano', isRegex: false, novo: '( X ) Desatualizada – datada de período superior a um ano - ', bold: true, italic: false, font: '' },
+        // --- Item 6: Sobre as custas prévias ---
+        { id: 'regra_1773829306382', category: '6 – AJG', name: 'SEM Rendimentos', target: '(   ) há pedido de AJG sem comprovação de rendimentos', isRegex: false, novo: '( X ) há pedido de AJG sem comprovação de rendimentos.', bold: true, italic: false, font: '' },
+        { id: 'item6_com_documento', category: '6 – AJG', name: 'Com documento', target: '(   ) há pedido de AJG com o seguinte documento nos autos -', isRegex: false, novo: '( X ) há pedido de AJG com o seguinte documento nos autos -\u00a0', bold: true, italic: false, font: '' },
+        { id: 'item6_custas', category: '6 – AJG', name: 'Custas recolhidas', target: '(   ) há recolhimento de custas -', isRegex: false, novo: '( X ) há recolhimento de custas -\u00a0', bold: true, italic: false, font: '' }
       ]
     }
   ];
 
   const CHAVE_PERFIS = 'tm_eproc_perfis_v6';
+  const VERSAO_PADRAO = '8.15';
+  const CHAVE_VER_PADRAO = 'tm_eproc_ver_padrao';
 
   // [REVERSIVEL] Le qualquer chave de perfis (aceita array ou modelo unico), filtrando entradas invalidas.
   function lerListaPerfis(chave) {
@@ -547,6 +564,14 @@
       if (mesclarPerfisSalvos(perfisSalvos, lista)) mudou = true;
     });
     if (!Array.isArray(perfisSalvos) || perfisSalvos.length === 0) perfisSalvos = perfisPadrao;
+    // [ATUALIZACAO] Mescla os novos botoes padrao sem apagar os existentes (pessoais ou de versoes anteriores).
+    // So executa quando a versao dos padroes muda.
+    let verSalva = null;
+    try { verSalva = localStorage.getItem(CHAVE_VER_PADRAO); } catch (e) {}
+    if (verSalva !== VERSAO_PADRAO) {
+      if (mesclarPerfisSalvos(perfisSalvos, perfisPadrao)) mudou = true;
+      try { localStorage.setItem(CHAVE_VER_PADRAO, VERSAO_PADRAO); } catch (e) {}
+    }
     if (mudou) { try { localStorage.setItem(CHAVE_PERFIS, JSON.stringify(perfisSalvos)); } catch (e) {} }
   })();
 
