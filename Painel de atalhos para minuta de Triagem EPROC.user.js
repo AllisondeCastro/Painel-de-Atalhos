@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Painel de atalhos para minuta de Triagem EPROC
 // @namespace    http://tampermonkey.net/
-// @version      8.15
+// @version      8.16
 // @description  Dashboard Multi-Minutas
 // @author       Allison de Castro Silva
 // @match        https://eproc1g.tjmg.jus.br/eproc/controlador.php?acao=arvore_documento_listar*
@@ -485,6 +485,7 @@
   const CHAVE_PERFIS = 'tm_eproc_perfis_v6';
   const VERSAO_PADRAO = '8.15';
   const CHAVE_VER_PADRAO = 'tm_eproc_ver_padrao';
+  const CHAVE_EXCLUIDOS = 'tm_eproc_excluidos_v1';
 
   // [REVERSIVEL] Le qualquer chave de perfis (aceita array ou modelo unico), filtrando entradas invalidas.
   function lerListaPerfis(chave) {
@@ -497,6 +498,94 @@
       const limpos = v.filter(function (p) { return p && typeof p === 'object' && p.nome; });
       return limpos.length ? limpos : null;
     } catch (e) { return null; }
+  }
+
+  function lerExcluidos() {
+    const vazio = { regras: [], perfis: [] };
+    try {
+      const bruto = localStorage.getItem(CHAVE_EXCLUIDOS);
+      if (!bruto) return vazio;
+      const v = JSON.parse(bruto);
+      if (!v || typeof v !== 'object') return vazio;
+      return {
+        regras: Array.isArray(v.regras) ? v.regras.filter(function (k) { return typeof k === 'string' && k; }) : [],
+        perfis: Array.isArray(v.perfis) ? v.perfis.filter(function (k) { return typeof k === 'string' && k; }) : []
+      };
+    } catch (e) { return vazio; }
+  }
+
+  function gravarExcluidos(ex) {
+    try { localStorage.setItem(CHAVE_EXCLUIDOS, JSON.stringify(ex)); } catch (e) {}
+  }
+
+  function chaveExcluidaRegra(perfilId, regraId) {
+    if (!perfilId || !regraId) return '';
+    return String(perfilId) + '|' + String(regraId);
+  }
+
+  function regraExcluida(ex, perfilId, regraId) {
+    const k = chaveExcluidaRegra(perfilId, regraId);
+    return !!k && ex.regras.indexOf(k) !== -1;
+  }
+
+  function perfilExcluido(ex, perfilId) {
+    return !!perfilId && ex.perfis.indexOf(String(perfilId)) !== -1;
+  }
+
+  function marcarRegraExcluida(perfilId, regraId) {
+    const k = chaveExcluidaRegra(perfilId, regraId);
+    if (!k) return;
+    const ex = lerExcluidos();
+    if (ex.regras.indexOf(k) === -1) {
+      ex.regras.push(k);
+      gravarExcluidos(ex);
+    }
+  }
+
+  function desmarcarRegraExcluida(perfilId, regraId) {
+    const k = chaveExcluidaRegra(perfilId, regraId);
+    if (!k) return;
+    const ex = lerExcluidos();
+    const i = ex.regras.indexOf(k);
+    if (i !== -1) {
+      ex.regras.splice(i, 1);
+      gravarExcluidos(ex);
+    }
+  }
+
+  function marcarPerfilExcluido(perfilId) {
+    if (!perfilId) return;
+    const id = String(perfilId);
+    const ex = lerExcluidos();
+    if (ex.perfis.indexOf(id) === -1) {
+      ex.perfis.push(id);
+      gravarExcluidos(ex);
+    }
+  }
+
+  function aplicarExcluidos(perfis, ex) {
+    let mudou = false;
+    if (!Array.isArray(perfis)) return mudou;
+    for (let i = perfis.length - 1; i >= 0; i--) {
+      const p = perfis[i];
+      if (!p || typeof p !== 'object') continue;
+      if (perfilExcluido(ex, p.id)) {
+        perfis.splice(i, 1);
+        mudou = true;
+        continue;
+      }
+      if (!Array.isArray(p.regras)) {
+        p.regras = [];
+        mudou = true;
+        continue;
+      }
+      const filtradas = p.regras.filter(function (r) { return !r || !regraExcluida(ex, p.id, r.id); });
+      if (filtradas.length !== p.regras.length) {
+        p.regras = filtradas;
+        mudou = true;
+      }
+    }
+    return mudou;
   }
 
   // [COMPATIBILIDADE] Procuras chaves de modelos gravadas por versoes/scripts anteriores.
@@ -517,21 +606,27 @@
   }
 
   // [COMPATIBILIDADE] Acrescenta modelos/atalhos ausentes SEM sobrescrever os ja salvos.
-  function mesclarPerfisSalvos(base, entrada) {
+  function mesclarPerfisSalvos(base, entrada, ex) {
     let mudou = false;
+    const lixeira = ex || lerExcluidos();
     (entrada || []).forEach(function (p) {
       if (!p || !p.nome) return;
       const id = p.id || ('perfil_' + String(p.nome).replace(/[^a-z0-9]+/gi, '_').toLowerCase());
+      if (perfilExcluido(lixeira, id)) return;
       let atual = null;
       for (let i = 0; i < base.length; i++) { if (base[i] && base[i].id === id) { atual = base[i]; break; } }
       if (!atual) {
-        base.push({ id: id, nome: p.nome, keywords: p.keywords || '', regras: Array.isArray(p.regras) ? p.regras.slice() : [] });
+        const regras = (Array.isArray(p.regras) ? p.regras : []).filter(function (r) {
+          return r && !regraExcluida(lixeira, id, r.id);
+        });
+        base.push({ id: id, nome: p.nome, keywords: p.keywords || '', regras: regras });
         mudou = true;
         return;
       }
       const existentes = Array.isArray(atual.regras) ? atual.regras : (atual.regras = []);
       (Array.isArray(p.regras) ? p.regras : []).forEach(function (r) {
         if (!r) return;
+        if (regraExcluida(lixeira, id, r.id)) return;
         const dup = existentes.some(function (e) {
           if (!e) return false;
           if (e.id && r.id) return e.id === r.id;
@@ -546,32 +641,36 @@
   let perfisSalvos = [];
   (function carregarPerfis() {
     const atual = lerListaPerfis(CHAVE_PERFIS);
-    const anteriores = [];
-    chavesPerfisAnteriores().forEach(function (k) {
-      const lista = lerListaPerfis(k);
-      if (lista) anteriores.push(lista);
-    });
+    const excluidos = lerExcluidos();
     let mudou = false;
     if (atual) {
       perfisSalvos = atual;
-    } else if (anteriores.length) {
-      perfisSalvos = anteriores.shift();
-      mudou = true;
     } else {
-      perfisSalvos = perfisPadrao;
+      const anteriores = [];
+      chavesPerfisAnteriores().forEach(function (k) {
+        const lista = lerListaPerfis(k);
+        if (lista) anteriores.push(lista);
+      });
+      if (anteriores.length) {
+        perfisSalvos = anteriores.shift();
+        mudou = true;
+      } else {
+        perfisSalvos = perfisPadrao;
+      }
+      anteriores.forEach(function (lista) {
+        if (mesclarPerfisSalvos(perfisSalvos, lista, excluidos)) mudou = true;
+      });
     }
-    anteriores.forEach(function (lista) {
-      if (mesclarPerfisSalvos(perfisSalvos, lista)) mudou = true;
-    });
     if (!Array.isArray(perfisSalvos) || perfisSalvos.length === 0) perfisSalvos = perfisPadrao;
     // [ATUALIZACAO] Mescla os novos botoes padrao sem apagar os existentes (pessoais ou de versoes anteriores).
     // So executa quando a versao dos padroes muda.
     let verSalva = null;
     try { verSalva = localStorage.getItem(CHAVE_VER_PADRAO); } catch (e) {}
     if (verSalva !== VERSAO_PADRAO) {
-      if (mesclarPerfisSalvos(perfisSalvos, perfisPadrao)) mudou = true;
+      if (mesclarPerfisSalvos(perfisSalvos, perfisPadrao, excluidos)) mudou = true;
       try { localStorage.setItem(CHAVE_VER_PADRAO, VERSAO_PADRAO); } catch (e) {}
     }
+    if (aplicarExcluidos(perfisSalvos, excluidos)) mudou = true;
     if (mudou) { try { localStorage.setItem(CHAVE_PERFIS, JSON.stringify(perfisSalvos)); } catch (e) {} }
   })();
 
@@ -579,8 +678,35 @@
   let perfilEditandoId = null;
 
   function salvarPerfis() {
-    try { localStorage.setItem(CHAVE_PERFIS, JSON.stringify(perfisSalvos)); } catch (e) {}
+    try {
+      aplicarExcluidos(perfisSalvos, lerExcluidos());
+      localStorage.setItem(CHAVE_PERFIS, JSON.stringify(perfisSalvos));
+    } catch (e) {}
   }
+
+  function recarregarPerfisExternos() {
+    try {
+      const atual = lerListaPerfis(CHAVE_PERFIS);
+      if (!atual) return;
+      const excluidos = lerExcluidos();
+      perfisSalvos = atual;
+      aplicarExcluidos(perfisSalvos, excluidos);
+      const sumiu = !!(perfilEditandoId && !perfisSalvos.some(function (p) { return p.id === perfilEditandoId; }));
+      if (sumiu) perfilEditandoId = perfisSalvos.length ? perfisSalvos[0].id : null;
+      detectarPerfilAtual();
+      renderPainelPrincipal();
+      const modal = document.getElementById('td-modal-config');
+      if (modal && modal.classList.contains('td-modal-active')) {
+        atualizarDropdownPerfis();
+        if (sumiu && document.getElementById('td-cfg-id')) limparFormulario();
+      }
+    } catch (e) {}
+  }
+
+  window.addEventListener('storage', function (ev) {
+    if (!ev || !ev.key) return;
+    if (ev.key === CHAVE_PERFIS || ev.key === CHAVE_EXCLUIDOS) recarregarPerfisExternos();
+  });
 
   function traduzirKeywordParaEproc(texto) {
     return texto.trim()
@@ -1557,10 +1683,13 @@
       del.addEventListener('click', function (ev) {
         ev.stopPropagation();
         if (confirm('Excluir o atalho "' + regra.name + '" deste modelo?')) {
+          marcarRegraExcluida(perfilAtual.id, regra.id);
           perfilAtual.regras = perfilAtual.regras.filter(function (r) { return r.id !== regra.id; });
           salvarPerfis();
           renderListaConfig();
           limparFormulario();
+          detectarPerfilAtual();
+          renderPainelPrincipal();
         }
       });
       linha.appendChild(texto);
@@ -2046,6 +2175,7 @@
       if (!confirm('CUIDADO: Importar um backup geral apagará TODOS os seus modelos e atalhos atuais.\nDeseja continuar?')) return;
       importarArquivoJSON(function (data) {
         if (Array.isArray(data) && data.length > 0 && data[0].regras) {
+          gravarExcluidos({ regras: [], perfis: [] });
           perfisSalvos = data;
           salvarPerfis();
           atualizarDropdownPerfis();
@@ -2121,10 +2251,14 @@
     document.getElementById('td-btn-excluir-perfil').addEventListener('click', function () {
       if (!perfilEditandoId) return;
       const p = perfisSalvos.find(function (x) { return x.id === perfilEditandoId; });
+      if (!p) return;
       if (confirm('Tem certeza que deseja excluir todo o modelo "' + p.nome + '" e todos os seus atalhos?')) {
+        marcarPerfilExcluido(perfilEditandoId);
         perfisSalvos = perfisSalvos.filter(function (x) { return x.id !== perfilEditandoId; });
         salvarPerfis();
         atualizarDropdownPerfis();
+        detectarPerfilAtual();
+        renderPainelPrincipal();
       }
     });
 
@@ -2141,12 +2275,14 @@
         return;
       }
       const p = perfisSalvos.find(function (x) { return x.id === perfilEditandoId; });
+      if (!p) return;
       const alvo = document.getElementById('td-cfg-alvo').value;
       if (!alvo || alvo.trim() === '') {
         toast('O campo \'Texto Alvo\' é obrigatório.', true);
         return;
       }
       const id = document.getElementById('td-cfg-id').value || 'regra_' + Date.now();
+      desmarcarRegraExcluida(perfilEditandoId, id);
       const nova = {
         id: id,
         category: document.getElementById('td-cfg-categoria').value || 'Geral',
@@ -2173,10 +2309,14 @@
       const id = document.getElementById('td-cfg-id').value;
       if (id && perfilEditandoId) {
         const p = perfisSalvos.find(function (x) { return x.id === perfilEditandoId; });
+        if (!p) return;
+        marcarRegraExcluida(perfilEditandoId, id);
         p.regras = p.regras.filter(function (r) { return r.id !== id; });
         salvarPerfis();
         renderListaConfig();
         limparFormulario();
+        detectarPerfilAtual();
+        renderPainelPrincipal();
       }
     });
 
