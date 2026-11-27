@@ -2043,7 +2043,7 @@
           '<div class="td-modal-row"><span class="td-label-dig">Dígitos <strong class="td-badge">4 e 8</strong></span><span class="td-nome">Dra. Sabrina</span></div>' +
           '<div class="td-modal-row"><span class="td-label-dig">Dígitos <strong class="td-badge">0, 1, 3 e 5</strong></span><span class="td-nome">Dr. Gustavo</span></div>' +
           '<div class="td-modal-row"><span class="td-label-dig">Dígitos <strong class="td-badge">6, 7 e 9</strong></span><span class="td-nome">Dr. Artur</span></div>' +
-          '<div class="td-modal-row"><span class="td-label-dig">Dígito <strong class="td-badge">2</strong></span><span class="td-nome">Dra. Raiza</span></div>' +
+          '<div class="td-modal-row"><span class="td-label-dig">Dígito <strong class="td-badge">2</strong></span><span class="td-nome">Dr. Daniel</span></div>' +
         '</div>' +
       '</div>';
 
