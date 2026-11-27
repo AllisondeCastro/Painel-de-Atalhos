@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Painel de atalhos para minuta de Triagem EPROC
 // @namespace    http://tampermonkey.net/
-// @version      8.22
+// @version      8.23
 // @description  Dashboard Multi-Minutas
 // @author       Allison de Castro Silva
 // @match        https://eproc1g.tjmg.jus.br/eproc/controlador.php?acao=arvore_documento_listar*
